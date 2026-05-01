@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSA — Beautiful Stay by Alliance</title>
+<link rel="icon" type="image/png" href="images/logo-bsa.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── NAVBAR ─────────────────────────────────────────────── -->
+<nav class="nav" id="navbar">
+  <div class="nav-brand" onclick="showPage('accueil')">
+    <img src="images/logo-bsa.png" alt="BSA Logo" class="nav-logo">
+    <div class="nav-brand-text">
+      <span class="nav-title">Beautiful Stay by Alliance</span>
+      <span class="nav-sub">Le plaisir d'être mieux logé !</span>
+    </div>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="#" class="nav-link active" data-page="accueil">Accueil</a>
+    <a href="#" class="nav-link" data-page="appartements">Appartements</a>
+    <a href="#" class="nav-link" data-page="services">Nos Services</a>
+    <a href="#" class="nav-link nav-auth-hide" data-page="mes-reservations">Mes réservations</a>
+    <a href="#" class="nav-link nav-emp" data-page="dashboard">Tableau de bord</a>
+    <a href="#" class="nav-link nav-emp" data-page="clients">Clients</a>
+    <a href="#" class="nav-link nav-emp" data-page="rapports">Rapports</a>
+    <a href="#" class="nav-link nav-gest" data-page="admin">Administration</a>
+  </div>
+  <div class="nav-actions">
+    <div class="nav-user" id="navUser" style="display:none">
+      <span id="userGreeting"></span>
+      <span class="badge" id="userBadge"></span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Déconnexion</button>
+    </div>
+    <div id="navGuest">
+      <button class="btn btn-outline btn-sm" onclick="showPage('login')">Connexion</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('register')">S'inscrire</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── PAGES ──────────────────────────────────────────────── -->
+<main id="main">
+
+<!-- PAGE : ACCUEIL -->
+<section id="page-accueil" class="page active">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-logo-wrap">
+        <img src="images/logo-bsa.png" alt="BSA" class="hero-logo">
+      </div>
+      <h1 class="hero-title">Beautiful Stay<br><span class="hero-title-green">by Alliance</span></h1>
+      <p class="hero-tagline">Le plaisir d'être mieux logé !</p>
+      <p class="hero-sub">Appartements meublés haut de gamme à Yaoundé — Omnisport.<br>WiFi · Petit-déjeuner · Clim · Sécurité 24h/24</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" onclick="showPage('appartements')">Voir les appartements</button>
+        <button class="btn btn-outline-white btn-lg" onclick="showPage('services')">Nos services</button>
+      </div>
+      <div class="hero-contact">
+        <span>📞 +237 675 992 561 / 670 306 644</span>
+        <span>✉️ bsasarl49@gmail.com</span>
+        <span>📍 Omnisport derrière le stade, Yaoundé</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-band">
+    <div class="stat-item">
+      <span class="stat-n" id="statDispo">15</span>
+      <span class="stat-l">Appartements</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-n">24h/7</span>
+      <span class="stat-l">Sécurité</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-n">5★</span>
+      <span class="stat-l">Service</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-n">100%</span>
+      <span class="stat-l">Satisfaction</span>
+    </div>
+  </div>
+
+  <!-- Avantages -->
+  <div class="section">
+    <h2 class="section-title text-center">Nos avantages</h2>
+    <div class="avantages-grid">
+      <div class="avantage-card">
+        <div class="av-icon">📶</div>
+        <h4>WiFi gratuit</h4>
+        <p>WiFi illimité et haut débit dans tous les appartements</p>
+      </div>
+      <div class="avantage-card">
+        <div class="av-icon">☕</div>
+        <h4>Petit-déjeuner</h4>
+        <p>Petit-déjeuner gratuit tous les matins</p>
+      </div>
+      <div class="avantage-card">
+        <div class="av-icon">🚿</div>
+        <h4>Eau chaude/froide</h4>
+        <p>Système eau chaude et eau froide en permanence</p>
+      </div>
+      <div class="avantage-card">
+        <div class="av-icon">⚡</div>
+        <h4>Groupe électrogène</h4>
+        <p>Relais immédiat en cas de coupure d'énergie</p>
+      </div>
+      <div class="avantage-card">
+        <div class="av-icon">📹</div>
+        <h4>Vidéo surveillance</h4>
+        <p>Sécurité garantie 24h/24</p>
+      </div>
+      <div class="avantage-card">
+        <div class="av-icon">🧹</div>
+        <h4>Service de ménage</h4>
+        <p>Ménage quotidien pour votre confort</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Catégories de prix -->
+  <div class="section section-dark">
+    <h2 class="section-title text-center" style="color:#fff">Nos appartements</h2>
+    <div class="categories-grid">
+      <div class="cat-card" onclick="filterCat('standard')">
+        <div class="cat-badge">Standard</div>
+        <div class="cat-price">À partir de <strong>38 000 FCFA</strong>/nuit</div>
+        <p>Salon avec balcon · 2 chambres · Cuisine · 2 douches · WiFi</p>
+      </div>
+      <div class="cat-card cat-featured" onclick="filterCat('moyen')">
+        <div class="cat-badge badge-pink">Moyen</div>
+        <div class="cat-price">À partir de <strong>60 000 FCFA</strong>/nuit</div>
+        <p>Salon avec balcon · 2 chambres · Cuisine · 2 douches · WiFi · Clim</p>
+      </div>
+      <div class="cat-card" onclick="filterCat('VIP')">
+        <div class="cat-badge badge-gold">VIP</div>
+        <div class="cat-price">À partir de <strong>80 000 FCFA</strong>/nuit</div>
+        <p>Salon avec balcon · 2 chambres · Cuisine · 2 douches · WiFi · Clim Premium</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE : APPARTEMENTS -->
+<section id="page-appartements" class="page">
+  <div class="page-header">
+    <div>
+      <h1>Appartements BSA</h1>
+      <p style="color:var(--gris3);font-size:14px">Omnisport derrière le stade, Yaoundé</p>
+    </div>
+    <div class="filters">
+      <select id="filtCat" onchange="loadAppartements()">
+        <option value="">Toutes catégories</option>
+        <option value="standard">Standard</option>
+        <option value="moyen">Moyen</option>
+        <option value="VIP">VIP</option>
+      </select>
+      <select id="filtDispo" onchange="loadAppartements()">
+        <option value="">Tous</option>
+        <option value="true">Disponibles</option>
+      </select>
+    </div>
+  </div>
+  <div class="appart-grid" id="appartGrid">
+    <div class="loading-spinner">Chargement des appartements...</div>
+  </div>
+</section>
+
+<!-- PAGE : NOS SERVICES -->
+<section id="page-services" class="page">
+  <div class="page-header">
+    <h1>Nos Services</h1>
+    <p style="color:var(--gris3)">BSA SARL — Une gamme complète pour votre séjour</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="srv-icon">✈️</div>
+      <h3>Accueil à l'aéroport</h3>
+      <p>Nous vous accueillons à l'aéroport de Yaoundé-Nsimalen et vous accompagnons jusqu'à votre appartement en toute sérénité.</p>
+      <button class="btn btn-primary" onclick="showPage('login')">Demander ce service</button>
+    </div>
+    <div class="service-card">
+      <div class="srv-icon">🏠</div>
+      <h3>Appartements meublés</h3>
+      <p>Des appartements confortables et bien équipés à Omnisport, Yaoundé. Disponibles à la nuit, à la semaine ou au mois.</p>
+      <button class="btn btn-primary" onclick="showPage('appartements')">Voir les appartements</button>
+    </div>
+    <div class="service-card">
+      <div class="srv-icon">🗺️</div>
+      <h3>Visite guidée & Tourisme</h3>
+      <p>Découvrez le Cameroun avec nos guides experts. Visites de la ville, sites touristiques, excursions sur mesure.</p>
+      <button class="btn btn-primary" onclick="showPage('login')">Planifier une visite</button>
+    </div>
+    <div class="service-card">
+      <div class="srv-icon">🚗</div>
+      <h3>Location de voitures</h3>
+      <p>Toyota Corolla Verso · RAV4 Grise · Yaris OR<br>À partir de 35 000 FCFA/jour en ville</p>
+      <div class="voiture-prix">
+        <div class="vp-item"><strong>Toyota Corolla Verso</strong><br>4 500f/h · 50 000f/j · 300 000f/sem</div>
+        <div class="vp-item"><strong>RAV4 Grise</strong><br>5 000f/h · 55 000f/j · 315 000f/sem</div>
+        <div class="vp-item"><strong>Yaris OR</strong><br>4 000f/h · 35 000f/j · 200 000f/sem</div>
+      </div>
+    </div>
+    <div class="service-card">
+      <div class="srv-icon">🌍</div>
+      <h3>Excursions</h3>
+      <p>Partez à la découverte des merveilles du Cameroun. Nos excursions sont organisées sur mesure selon vos envies.</p>
+      <button class="btn btn-primary" onclick="showPage('login')">Organiser une excursion</button>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE : MES RÉSERVATIONS -->
+<section id="page-mes-reservations" class="page">
+  <div class="page-header">
+    <h1>Mes réservations</h1>
+    <button class="btn btn-primary" onclick="showPage('appartements')">Nouvelle réservation</button>
+  </div>
+  <div id="mesReservList"><div class="loading-spinner">Chargement...</div></div>
+</section>
+
+<!-- PAGE : DASHBOARD -->
+<section id="page-dashboard" class="page">
+  <h1 class="page-h1">Tableau de bord BSA</h1>
+  <div class="stats-row" id="statsRow"></div>
+  <div class="dash-grid">
+    <div class="dash-panel">
+      <h3>Appartements loués aujourd'hui</h3>
+      <div id="tableDashLoues"></div>
+    </div>
+    <div class="dash-panel">
+      <h3>Actions rapides</h3>
+      <div class="quick-actions">
+        <button class="btn btn-primary w100" onclick="showModalReservation()">➕ Nouvelle réservation</button>
+        <button class="btn btn-outline w100" onclick="showPage('rapports')">📊 Voir les rapports</button>
+        <button class="btn btn-outline w100" onclick="exportCSV()">📥 Exporter CSV</button>
+        <button class="btn btn-ghost w100 nav-gest" onclick="lancerCron()">🔄 Vérification manuelle</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE : CLIENTS -->
+<section id="page-clients" class="page">
+  <div class="page-header">
+    <h1>Gestion des clients</h1>
+    <div class="search-bar">
+      <input type="text" id="searchClient" placeholder="Rechercher par nom ou CNI..." oninput="loadClients()">
+    </div>
+  </div>
+  <div id="clientsTable"></div>
+</section>
+
+<!-- PAGE : RAPPORTS -->
+<section id="page-rapports" class="page">
+  <h1 class="page-h1">Rapports</h1>
+  <div class="rapport-tabs">
+    <button class="rtab active" onclick="loadRapport('journalier',this)">Journalier</button>
+    <button class="rtab" onclick="loadRapport('mensuel',this)">Mensuel</button>
+    <button class="rtab" onclick="loadRapport('resume',this)">Résumé financier</button>
+  </div>
+  <div class="rapport-filters">
+    <input type="month" id="filtMois">
+    <button class="btn btn-outline btn-sm" onclick="exportCSV()">📥 Export CSV</button>
+  </div>
+  <div id="rapportContent"></div>
+</section>
+
+<!-- PAGE : ADMIN -->
+<section id="page-admin" class="page">
+  <h1 class="page-h1">Administration</h1>
+  <div class="admin-tabs">
+    <button class="atab active" onclick="loadAdmin('employes',this)">Employés</button>
+    <button class="atab" onclick="loadAdmin('appartements',this)">Appartements</button>
+    <button class="atab" onclick="loadAdmin('services',this)">Services additionnels</button>
+    <button class="atab" onclick="loadAdmin('logs',this)">Journal des accès</button>
+  </div>
+  <div id="adminContent"></div>
+</section>
+
+<!-- PAGE : LOGIN -->
+<section id="page-login" class="page page-auth">
+  <div class="auth-card">
+    <img src="images/logo-bsa.png" alt="BSA" class="auth-logo">
+    <h2>Connexion</h2>
+    <div id="loginError" class="alert alert-error" style="display:none"></div>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" required placeholder="votre@email.com">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="loginPwd" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary w100">Se connecter</button>
+    </form>
+    <p class="auth-link">Pas encore de compte ? <a href="#" onclick="showPage('register')">S'inscrire</a></p>
+  </div>
+</section>
+
+<!-- PAGE : REGISTER -->
+<section id="page-register" class="page page-auth">
+  <div class="auth-card">
+    <img src="images/logo-bsa.png" alt="BSA" class="auth-logo">
+    <h2>Créer un compte</h2>
+    <div id="registerError" class="alert alert-error" style="display:none"></div>
+    <div id="registerSuccess" class="alert alert-success" style="display:none"></div>
+    <form onsubmit="handleRegister(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nom complet *</label>
+          <input type="text" id="regNom" required placeholder="Jean Dupont">
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="regEmail" required placeholder="jean@email.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>N° CNI *</label>
+          <input type="text" id="regCni" required placeholder="123456789">
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="tel" id="regTel" placeholder="+237 6XX XXX XXX">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Adresse</label>
+        <input type="text" id="regAdresse" placeholder="Votre adresse">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mot de passe *</label>
+          <input type="password" id="regPwd" required minlength="8" placeholder="8 caractères minimum">
+        </div>
+        <div class="form-group">
+          <label>Confirmer *</label>
+          <input type="password" id="regPwd2" required placeholder="Répéter">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w100">Créer mon compte</button>
+    </form>
+    <p class="auth-link">Déjà un compte ? <a href="#" onclick="showPage('login')">Se connecter</a></p>
+  </div>
+</section>
+
+</main>
+
+<!-- ── MODAL RÉSERVATION ──────────────────────────────────── -->
+<div class="modal-overlay" id="modalReservation" style="display:none" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="images/logo-bsa.png" alt="BSA" style="height:32px">
+        <h3 id="modalTitle">Réserver un appartement</h3>
+      </div>
+      <button class="modal-close" onclick="closeModalFn()">✕</button>
+    </div>
+    <form id="reservForm" onsubmit="submitReservation(event)">
+      <div class="modal-body">
+        <div id="reservError" class="alert alert-error" style="display:none"></div>
+
+        <!-- Sélection client (employé/gestionnaire) -->
+        <div class="form-group" id="selectClientGroup" style="display:none">
+          <label>ID Client *</label>
+          <input type="number" id="rClientId" placeholder="Numéro ID du client">
+        </div>
+
+        <!-- Appartement -->
+        <div class="form-group">
+          <label>Appartement *</label>
+          <select id="rAppart" required onchange="calcMontant()">
+            <option value="">Sélectionner un appartement</option>
+          </select>
+        </div>
+
+        <!-- Type de location -->
+        <div class="form-group">
+          <label>Type de location</label>
+          <select id="rTypeLocation" onchange="calcMontant()">
+            <option value="appartement">Appartement complet</option>
+            <option value="studio">Studio</option>
+          </select>
+        </div>
+
+        <!-- Dates -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date d'entrée *</label>
+            <input type="date" id="rDateEntree" required onchange="calcMontant()">
+          </div>
+          <div class="form-group">
+            <label>Date de sortie</label>
+            <input type="date" id="rDateSortie" onchange="calcMontant()">
+          </div>
+        </div>
+
+        <!-- Avance -->
+        <div class="form-group">
+          <label>Avance payée (FCFA)</label>
+          <input type="number" id="rAvance" placeholder="0" min="0">
+        </div>
+
+        <!-- ═══ SERVICES ADDITIONNELS ═══ -->
+        <div class="services-section">
+          <h4 class="services-title">🌟 Services additionnels (optionnels)</h4>
+
+          <!-- Accueil aéroport -->
+          <div class="service-toggle">
+            <label class="toggle-label">
+              <input type="checkbox" id="sAeroport" onchange="toggleService('aeroportDetails')">
+              <span class="toggle-check"></span>
+              ✈️ Accueil à l'aéroport
+            </label>
+          </div>
+          <div id="aeroportDetails" class="service-details" style="display:none">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date d'arrivée</label>
+                <input type="date" id="sAeroportDate">
+              </div>
+              <div class="form-group">
+                <label>Heure d'arrivée</label>
+                <input type="time" id="sAeroportHeure">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Numéro de vol</label>
+                <input type="text" id="sAeroportVol" placeholder="Ex: ET302">
+              </div>
+              <div class="form-group">
+                <label>Nombre de personnes</label>
+                <input type="number" id="sAeroportPersonnes" value="1" min="1">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tourisme / Visite guidée -->
+          <div class="service-toggle">
+            <label class="toggle-label">
+              <input type="checkbox" id="sTourisme" onchange="toggleService('tourismeDetails')">
+              <span class="toggle-check"></span>
+              🗺️ Visite guidée / Tourisme
+            </label>
+          </div>
+          <div id="tourismeDetails" class="service-details" style="display:none">
+            <div class="form-group">
+              <label>Type de visite</label>
+              <select id="sTourismeType">
+                <option value="visite_guidee">Visite guidée de Yaoundé</option>
+                <option value="excursion">Excursion hors de la ville</option>
+                <option value="tourisme">Circuit touristique</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date souhaitée</label>
+                <input type="date" id="sTourismeDate">
+              </div>
+              <div class="form-group">
+                <label>Nombre de personnes</label>
+                <input type="number" id="sTourismePersonnes" value="1" min="1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Destination / Détails</label>
+              <textarea id="sTourismeDesc" rows="2" placeholder="Précisez vos souhaits..."></textarea>
+            </div>
+          </div>
+
+        </div><!-- fin services additionnels -->
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label>Notes supplémentaires</label>
+          <textarea id="rNotes" rows="2" placeholder="Informations complémentaires..."></textarea>
+        </div>
+
+        <!-- Aperçu montant -->
+        <div class="montant-preview" id="montantPreview" style="display:none">
+          <div class="mp-row"><span>Durée :</span><span id="mpJours">—</span></div>
+          <div class="mp-row"><span>Prix/nuit :</span><span id="mpPrix">—</span></div>
+          <div class="mp-row mp-total"><span>Total estimé :</span><span id="mpTotal">—</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModalFn()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Confirmer la réservation</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────── -->
+<div id="toast" class="toast"></div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <img src="images/logo-bsa.png" alt="BSA" style="height:50px">
+      <p>Beautiful Stay by Alliance</p>
+      <p class="footer-tag">Le plaisir d'être mieux logé !</p>
+    </div>
+    <div class="footer-info">
+      <h4>Contact</h4>
+      <p>📞 +237 675 992 561 / 670 306 644</p>
+      <p>📞 +237 693 691 629 / 656 530 163</p>
+      <p>✉️ bsasarl49@gmail.com</p>
+      <p>🌐 www.beautifulstayzone.cm</p>
+      <p>📍 Yaoundé - Omnisport derrière le stade</p>
+    </div>
+    <div class="footer-services">
+      <h4>Nos services</h4>
+      <p>🏠 Appartements meublés</p>
+      <p>✈️ Accueil à l'aéroport</p>
+      <p>🗺️ Visite guidée & Tourisme</p>
+      <p>🚗 Location de voitures</p>
+      <p>🌍 Excursions</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 BSA SARL — Tous droits réservés</p>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
