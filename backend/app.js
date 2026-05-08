@@ -1,12 +1,11 @@
 // ============================================================
-// app.js — Logique principale SPA
+// app.js BSA — Beautiful Stay by Alliance
 // ============================================================
 
 let currentUser = null;
 let rapportActif = 'journalier';
-let adminActif   = 'employes';
 
-// ── Initialisation ────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
     initNav();
     const token = localStorage.getItem('token');
@@ -15,12 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await api('/auth/me');
             currentUser = data.user;
             onLoginSuccess(data.user, false);
-        } catch {
-            localStorage.removeItem('token');
-        }
+        } catch { localStorage.removeItem('token'); }
     }
-    // Stats d'accueil (publiques)
-    loadStatsDispo();
     loadAppartements();
     showPage('accueil');
 });
@@ -28,10 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ── Navigation ────────────────────────────────────────────────
 function initNav() {
     document.querySelectorAll('.nav-link[data-page]').forEach(link => {
-        link.addEventListener('click', e => {
-            e.preventDefault();
-            showPage(link.dataset.page);
-        });
+        link.addEventListener('click', e => { e.preventDefault(); showPage(link.dataset.page); });
     });
 }
 
@@ -43,26 +35,25 @@ function showPage(page) {
     const link = document.querySelector(`.nav-link[data-page="${page}"]`);
     if (link) link.classList.add('active');
 
-    // Chargement à la demande
-    if (page === 'appartements') loadAppartements();
+    if (page === 'appartements')   loadAppartements();
     if (page === 'mes-reservations') loadMesReservations();
-    if (page === 'dashboard') loadDashboard();
-    if (page === 'clients') loadClients();
-    if (page === 'rapports') loadRapport('journalier');
-    if (page === 'admin') loadAdmin('employes');
+    if (page === 'dashboard')      loadDashboard();
+    if (page === 'clients')        loadClients();
+    if (page === 'rapports')       loadRapport('journalier');
+    if (page === 'admin')          loadAdmin('employes');
     window.scrollTo(0, 0);
 }
 
-// ── Authentification ──────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────────────
 async function handleLogin(e) {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const pwd   = document.getElementById('loginPwd').value;
     const errEl = document.getElementById('loginError');
     errEl.style.display = 'none';
-
     try {
-        const data = await api('/auth/login', 'POST', { email, password: pwd });
+        const data = await api('/auth/login', 'POST', {
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPwd').value
+        });
         localStorage.setItem('token', data.token);
         currentUser = data.user;
         onLoginSuccess(data.user, true);
@@ -79,22 +70,17 @@ async function handleRegister(e) {
     const errEl = document.getElementById('registerError');
     const okEl  = document.getElementById('registerSuccess');
     errEl.style.display = 'none';
-
-    if (pwd !== pwd2) {
-        errEl.textContent = 'Les mots de passe ne correspondent pas';
-        errEl.style.display = 'block'; return;
-    }
-
+    if (pwd !== pwd2) { errEl.textContent = 'Les mots de passe ne correspondent pas'; errEl.style.display = 'block'; return; }
     try {
         await api('/auth/register', 'POST', {
-            email:         document.getElementById('regEmail').value,
-            password:      pwd,
-            nom_client:    document.getElementById('regNom').value,
-            numero_cni:    document.getElementById('regCni').value,
+            email: document.getElementById('regEmail').value,
+            password: pwd,
+            nom_client: document.getElementById('regNom').value,
+            numero_cni: document.getElementById('regCni').value,
             adresse_client: document.getElementById('regAdresse').value,
-            telephone:     document.getElementById('regTel').value,
+            telephone: document.getElementById('regTel').value,
         });
-        okEl.textContent = 'Compte créé ! Vous pouvez maintenant vous connecter.';
+        okEl.textContent = 'Compte créé ! Connectez-vous maintenant.';
         okEl.style.display = 'block';
         setTimeout(() => showPage('login'), 2500);
     } catch (err) {
@@ -105,11 +91,10 @@ async function handleRegister(e) {
 
 function onLoginSuccess(user, redirect) {
     document.getElementById('navGuest').style.display = 'none';
-    document.getElementById('navUser').style.display  = 'flex';
+    document.getElementById('navUser').style.display = 'flex';
     document.getElementById('userGreeting').textContent = user.nom_client || user.nom_employee || user.email;
     document.getElementById('userBadge').textContent = user.role;
 
-    // Afficher les liens selon le rôle
     document.querySelectorAll('.nav-auth-hide').forEach(el => el.style.display = 'inline-flex');
     if (user.role === 'employe' || user.role === 'gestionnaire') {
         document.querySelectorAll('.nav-emp').forEach(el => el.style.display = 'inline-flex');
@@ -117,14 +102,11 @@ function onLoginSuccess(user, redirect) {
     if (user.role === 'gestionnaire') {
         document.querySelectorAll('.nav-gest').forEach(el => el.style.display = 'inline-flex');
     }
-
-    // Préparer modal réservation
     if (user.role !== 'client') {
         document.getElementById('selectClientGroup').style.display = 'block';
     }
-
     if (redirect) {
-        toast('Bienvenue !', 'success');
+        toast('Bienvenue chez BSA ! 🏠', 'success');
         if (user.role === 'client') showPage('mes-reservations');
         else showPage('dashboard');
     }
@@ -134,7 +116,7 @@ function logout() {
     localStorage.removeItem('token');
     currentUser = null;
     document.getElementById('navGuest').style.display = 'flex';
-    document.getElementById('navUser').style.display  = 'none';
+    document.getElementById('navUser').style.display = 'none';
     document.querySelectorAll('.nav-auth-hide,.nav-emp,.nav-gest').forEach(el => el.style.display = 'none');
     showPage('accueil');
     toast('Déconnecté');
@@ -144,28 +126,23 @@ function logout() {
 async function loadAppartements() {
     const grid = document.getElementById('appartGrid');
     if (!grid) return;
-    grid.innerHTML = '<div class="loading-spinner">Chargement des appartements...</div>';
+    grid.innerHTML = '<div class="loading-spinner">Chargement des appartements BSA...</div>';
 
     const params = new URLSearchParams();
-    const cat = document.getElementById('filtCat')?.value;
-    const bat = document.getElementById('filtBat')?.value;
+    const cat   = document.getElementById('filtCat')?.value;
     const dispo = document.getElementById('filtDispo')?.value;
     if (cat)   params.append('categorie', cat);
-    if (bat)   params.append('batiment', bat);
     if (dispo) params.append('disponible', dispo);
+    params.append('batiment', 'omnisport');
 
     try {
         const data = await api('/appartements?' + params.toString());
         grid.innerHTML = '';
-
         if (!data.appartements?.length) {
-            grid.innerHTML = '<div class="empty-state"><h3>Aucun appartement trouvé</h3><p>Modifiez vos filtres de recherche</p></div>';
+            grid.innerHTML = '<div class="empty-state"><h3>Aucun appartement trouvé</h3><p>Modifiez vos filtres</p></div>';
             return;
         }
-
-        data.appartements.forEach(a => {
-            grid.appendChild(buildAppartCard(a));
-        });
+        data.appartements.forEach(a => grid.appendChild(buildAppartCard(a)));
     } catch (err) {
         grid.innerHTML = `<div class="empty-state"><h3>Erreur de chargement</h3><p>${err.message}</p></div>`;
     }
@@ -175,29 +152,90 @@ function buildAppartCard(a) {
     const card = document.createElement('div');
     card.className = 'appart-card';
     const dispo = a.disponible;
+    const num = a.numero_appart;
+
+    // Photos de l'appartement
+    const photos = [0,1,2].map(i => `images/appartements/appart_${num}/${i}.jpg`);
+
+    // Tags commodités
+    const tags = [];
+    if (a.accomodation) {
+        if (a.accomodation.includes('WiFi')) tags.push('📶 WiFi');
+        if (a.accomodation.includes('Clim') || a.accomodation.includes('climatisation')) tags.push('❄️ Clim');
+        if (a.accomodation.includes('Petit-déjeuner')) tags.push('☕ Petit-dej');
+        if (a.accomodation.includes('balcon')) tags.push('🏡 Balcon');
+        if (a.accomodation.includes('cuisine')) tags.push('🍳 Cuisine');
+        if (a.accomodation.includes('Groupe')) tags.push('⚡ Générateur');
+    }
+
+    const cardId = `card-${a.id_appart}`;
+
     card.innerHTML = `
     <div class="appart-card-header">
       <div>
-        <div class="appart-num">Appart. ${a.numero_appart || a.id_appart}</div>
-        <div class="appart-bat">${a.nom_batiment ? `Bât. ${a.nom_batiment}` : ''} · ${a.capacite}</div>
+        <div class="appart-num">Appartement ${a.numero_appart}</div>
+        <div class="appart-bat">BSA Omnisport · Yaoundé</div>
       </div>
       <span class="badge-cat badge-${a.categorie.toLowerCase()}">${a.categorie}</span>
     </div>
+    <div class="appart-photos" id="${cardId}">
+      <img src="${photos[0]}" class="appart-photo active" alt="Appart ${num} - Salon"
+           onerror="this.style.display='none'">
+      <img src="${photos[1]}" class="appart-photo" alt="Appart ${num} - Chambre"
+           onerror="this.style.display='none'">
+      <img src="${photos[2]}" class="appart-photo" alt="Appart ${num} - Salle de bain"
+           onerror="this.style.display='none'">
+      <button class="photo-nav photo-prev" onclick="prevPhoto('${cardId}')">&#8249;</button>
+      <button class="photo-nav photo-next" onclick="nextPhoto('${cardId}')">&#8250;</button>
+      <div class="photo-dots">
+        <span class="photo-dot active"></span>
+        <span class="photo-dot"></span>
+        <span class="photo-dot"></span>
+      </div>
+      <div class="photo-dispo-badge ${dispo ? 'badge-dispo-yes' : 'badge-dispo-no'}">
+        ${dispo ? '✓ Disponible' : '✗ Occupé'}
+      </div>
+    </div>
     <div class="appart-card-body">
       <div class="appart-prix">${fmtPrix(a.prix_unitaire)} <small>/ nuit</small></div>
+      ${a.prix_studio ? `<div class="appart-prix-studio">Studio : ${fmtPrix(a.prix_studio)} / nuit</div>` : ''}
       <div class="appart-details">
-        <span><span class="dispo-dot ${dispo ? 'dispo-yes':'dispo-no'}"></span>${dispo ? 'Disponible':'Occupé'}</span>
-        ${a.telephone_appart ? `<span>📞 ${a.telephone_appart}</span>` : ''}
+        ${tags.map(t => `<span class="appart-tag">${t}</span>`).join('')}
       </div>
-      ${a.accomodation ? `<div class="appart-accom">✓ ${a.accomodation}</div>` : ''}
-      ${a.restriction ? `<div class="appart-accom" style="color:#C0392B">⚠ ${a.restriction}</div>` : ''}
+      <div class="appart-accom">Salon avec balcon · 2 chambres · 1 cuisine · 2 douches</div>
+      ${a.restriction ? `<div class="appart-restriction">⚠ ${a.restriction}</div>` : ''}
     </div>
     <div class="appart-card-footer">
       ${dispo && currentUser ? `<button class="btn btn-primary btn-sm" onclick="showModalReservation(${a.id_appart})">Réserver</button>` : ''}
-      ${!currentUser && dispo ? `<button class="btn btn-outline btn-sm" onclick="showPage('login')">Se connecter pour réserver</button>` : ''}
-      ${currentUser && (currentUser.role==='gestionnaire') ? `<button class="btn btn-ghost btn-sm" onclick="editAppart(${a.id_appart})">Modifier</button>` : ''}
+      ${!currentUser ? `<button class="btn btn-outline btn-sm" onclick="showPage('login')">Connexion pour réserver</button>` : ''}
+      ${currentUser?.role === 'gestionnaire' ? `<button class="btn btn-ghost btn-sm" onclick="editAppart(${a.id_appart})">Modifier</button>` : ''}
     </div>`;
     return card;
+}
+
+// Navigation carrousel photos
+function nextPhoto(cardId) {
+    const container = document.getElementById(cardId);
+    const photos = container.querySelectorAll('.appart-photo');
+    const dots = container.querySelectorAll('.photo-dot');
+    let active = [...photos].findIndex(p => p.classList.contains('active'));
+    photos[active].classList.remove('active');
+    dots[active].classList.remove('active');
+    active = (active + 1) % photos.length;
+    photos[active].classList.add('active');
+    dots[active].classList.add('active');
+}
+
+function prevPhoto(cardId) {
+    const container = document.getElementById(cardId);
+    const photos = container.querySelectorAll('.appart-photo');
+    const dots = container.querySelectorAll('.photo-dot');
+    let active = [...photos].findIndex(p => p.classList.contains('active'));
+    photos[active].classList.remove('active');
+    dots[active].classList.remove('active');
+    active = (active - 1 + photos.length) % photos.length;
+    photos[active].classList.add('active');
+    dots[active].classList.add('active');
 }
 
 function filterCat(cat) {
@@ -205,16 +243,135 @@ function filterCat(cat) {
     showPage('appartements');
 }
 
-// ── Mes Réservations ──────────────────────────────────────────
+// ── Modal réservation ─────────────────────────────────────────
+async function showModalReservation(idAppart = null) {
+    if (!currentUser) { showPage('login'); return; }
+    document.getElementById('reservError').style.display = 'none';
+    document.getElementById('montantPreview').style.display = 'none';
+    document.getElementById('rDateEntree').value = '';
+    document.getElementById('rDateSortie').value = '';
+    document.getElementById('rAvance').value = '';
+    document.getElementById('rNotes').value = '';
+
+    // Reset services
+    document.getElementById('sAeroport').checked = false;
+    document.getElementById('sTourisme').checked = false;
+    document.getElementById('aeroportDetails').style.display = 'none';
+    document.getElementById('tourismeDetails').style.display = 'none';
+
+    const sel = document.getElementById('rAppart');
+    sel.innerHTML = '<option value="">Chargement...</option>';
+    try {
+        const data = await api('/appartements?disponible=true&batiment=omnisport');
+        sel.innerHTML = '<option value="">Sélectionner un appartement</option>';
+        data.appartements.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.id_appart;
+            opt.textContent = `Appart. ${a.numero_appart} — ${a.categorie} — ${fmtPrix(a.prix_unitaire)}/nuit`;
+            opt.dataset.prix = a.prix_unitaire;
+            opt.dataset.prixStudio = a.prix_studio || a.prix_unitaire;
+            if (a.id_appart == idAppart) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        if (idAppart) calcMontant();
+    } catch { sel.innerHTML = '<option value="">Erreur de chargement</option>'; }
+
+    document.getElementById('modalReservation').style.display = 'flex';
+}
+
+function toggleService(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function closeModal(e) { if (e.target.id === 'modalReservation') closeModalFn(); }
+function closeModalFn() { document.getElementById('modalReservation').style.display = 'none'; }
+
+function calcMontant() {
+    const sel = document.getElementById('rAppart');
+    const opted = sel.options[sel.selectedIndex];
+    const typeLocation = document.getElementById('rTypeLocation').value;
+    const prix = typeLocation === 'studio'
+        ? parseFloat(opted?.dataset?.prixStudio) || 0
+        : parseFloat(opted?.dataset?.prix) || 0;
+    const d1 = new Date(document.getElementById('rDateEntree').value);
+    const d2 = new Date(document.getElementById('rDateSortie').value);
+    const prev = document.getElementById('montantPreview');
+
+    if (prix && !isNaN(d1) && !isNaN(d2) && d2 > d1) {
+        const jours = Math.ceil((d2 - d1) / 86400000);
+        document.getElementById('mpJours').textContent = jours + ' nuit(s)';
+        document.getElementById('mpPrix').textContent = fmtPrix(prix);
+        document.getElementById('mpTotal').textContent = fmtPrix(jours * prix);
+        prev.style.display = 'block';
+    } else { prev.style.display = 'none'; }
+}
+
+document.getElementById('rAppart')?.addEventListener('change', calcMontant);
+document.getElementById('rTypeLocation')?.addEventListener('change', calcMontant);
+
+async function submitReservation(e) {
+    e.preventDefault();
+    const errEl = document.getElementById('reservError');
+    errEl.style.display = 'none';
+
+    const typeLocation = document.getElementById('rTypeLocation').value;
+    const sel = document.getElementById('rAppart');
+    const opted = sel.options[sel.selectedIndex];
+    const prix = typeLocation === 'studio'
+        ? parseFloat(opted?.dataset?.prixStudio)
+        : parseFloat(opted?.dataset?.prix);
+
+    const body = {
+        id_appartement: parseInt(sel.value),
+        date_entree:    document.getElementById('rDateEntree').value,
+        date_sortie:    document.getElementById('rDateSortie').value || undefined,
+        avance_paye:    parseFloat(document.getElementById('rAvance').value) || 0,
+        notes:          document.getElementById('rNotes').value,
+        prix_unitaire_override: prix,
+        type_location: typeLocation,
+        // Services additionnels
+        service_aeroport: document.getElementById('sAeroport').checked ? {
+            date: document.getElementById('sAeroportDate').value,
+            heure: document.getElementById('sAeroportHeure').value,
+            vol: document.getElementById('sAeroportVol').value,
+            personnes: parseInt(document.getElementById('sAeroportPersonnes').value) || 1
+        } : null,
+        service_tourisme: document.getElementById('sTourisme').checked ? {
+            type: document.getElementById('sTourismeType').value,
+            date: document.getElementById('sTourismeDate').value,
+            personnes: parseInt(document.getElementById('sTourismePersonnes').value) || 1,
+            description: document.getElementById('sTourismeDesc').value
+        } : null
+    };
+
+    if (currentUser.role !== 'client') {
+        const cid = document.getElementById('rClientId').value;
+        if (!cid) { errEl.textContent = 'Veuillez saisir l\'ID du client'; errEl.style.display = 'block'; return; }
+        body.id_client = parseInt(cid);
+    }
+
+    try {
+        await api('/reservations', 'POST', body);
+        closeModalFn();
+        toast('Réservation BSA créée avec succès ! 🏠', 'success');
+        if (currentUser.role === 'client') { loadMesReservations(); showPage('mes-reservations'); }
+        else loadDashboard();
+    } catch (err) {
+        errEl.textContent = err.message || 'Erreur de réservation';
+        errEl.style.display = 'block';
+    }
+}
+
+// ── Mes réservations ──────────────────────────────────────────
 async function loadMesReservations() {
     if (!currentUser) { showPage('login'); return; }
     const el = document.getElementById('mesReservList');
     el.innerHTML = '<div class="loading-spinner">Chargement...</div>';
-
     try {
         const data = await api('/reservations');
         if (!data.reservations?.length) {
-            el.innerHTML = '<div class="empty-state"><h3>Aucune réservation</h3><p>Commencez par choisir un appartement !</p></div>';
+            el.innerHTML = '<div class="empty-state"><h3>Aucune réservation</h3><p>Choisissez un appartement BSA pour commencer !</p></div>';
             return;
         }
         el.innerHTML = '<div class="reserv-list" id="reservList"></div>';
@@ -228,126 +385,34 @@ async function loadMesReservations() {
 function buildReservCard(r) {
     const el = document.createElement('div');
     el.className = 'reserv-card';
-    const jours = r.nombre_jours || '—';
     el.innerHTML = `
     <div class="reserv-info">
-      <h4>Appart. ${r.numero_appart || r.id_appartement} · ${r.categorie || ''}</h4>
+      <h4>Appartement ${r.numero_appart} · BSA Omnisport</h4>
       <div class="reserv-meta">
         📅 Entrée : <strong>${fmtDate(r.date_entree)}</strong>
         ${r.date_sortie ? ` → Sortie : <strong>${fmtDate(r.date_sortie)}</strong>` : ''}
-        · ${jours} jour(s)
-        ${r.batiment_nom ? ` · Bât. ${r.batiment_nom}` : ''}
+        · ${r.nombre_jours || '—'} nuit(s)
       </div>
     </div>
-    <div style="display:flex;gap:12px;align-items:center">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
       <div>
         <div class="reserv-prix">${fmtPrix(r.montant_total)}</div>
-        <div style="font-size:12px;color:var(--gris3)">Total estimé</div>
+        <div style="font-size:11px;color:var(--gris3)">Total estimé</div>
       </div>
       <span class="reserv-statut s-${r.statut}">${r.statut.replace('_',' ')}</span>
-      ${r.statut === 'en_cours' || r.statut === 'confirmee' ? 
+      ${r.statut === 'en_cours' || r.statut === 'confirmee' ?
         `<button class="btn btn-danger btn-sm" onclick="annulerReservation(${r.id_reservation})">Annuler</button>` : ''}
     </div>`;
     return el;
 }
 
 async function annulerReservation(id) {
-    if (!confirm('Annuler cette réservation ? (délai de 24h pour les clients)')) return;
+    if (!confirm('Annuler cette réservation ? (délai de 24h maximum pour les clients)')) return;
     try {
         await api(`/reservations/${id}`, 'DELETE');
         toast('Réservation annulée', 'success');
         loadMesReservations();
-    } catch (err) {
-        toast(err.message, 'error');
-    }
-}
-
-// ── Modal Réservation ─────────────────────────────────────────
-async function showModalReservation(idAppart = null) {
-    if (!currentUser) { showPage('login'); return; }
-    document.getElementById('reservError').style.display = 'none';
-    document.getElementById('montantPreview').style.display = 'none';
-    document.getElementById('rDateEntree').value = '';
-    document.getElementById('rDateSortie').value = '';
-    document.getElementById('rAvance').value = '';
-    document.getElementById('rNotes').value = '';
-
-    // Charger les apparts disponibles
-    const sel = document.getElementById('rAppart');
-    sel.innerHTML = '<option value="">Chargement...</option>';
-    try {
-        const data = await api('/appartements?disponible=true');
-        sel.innerHTML = '<option value="">Sélectionner un appartement</option>';
-        data.appartements.forEach(a => {
-            const opt = document.createElement('option');
-            opt.value = a.id_appart;
-            opt.textContent = `Appart. ${a.numero_appart} — ${a.categorie} — ${fmtPrix(a.prix_unitaire)}/nuit ${a.nom_batiment ? `(${a.nom_batiment})` : ''}`;
-            opt.dataset.prix = a.prix_unitaire;
-            if (a.id_appart == idAppart) opt.selected = true;
-            sel.appendChild(opt);
-        });
-    } catch { sel.innerHTML = '<option value="">Erreur de chargement</option>'; }
-
-    document.getElementById('modalReservation').style.display = 'flex';
-}
-
-function closeModal(e) {
-    if (e.target.id === 'modalReservation') closeModalFn();
-}
-function closeModalFn() {
-    document.getElementById('modalReservation').style.display = 'none';
-}
-
-function calcMontant() {
-    const sel = document.getElementById('rAppart');
-    const opted = sel.options[sel.selectedIndex];
-    const prix = parseFloat(opted?.dataset?.prix) || 0;
-    const d1 = new Date(document.getElementById('rDateEntree').value);
-    const d2 = new Date(document.getElementById('rDateSortie').value);
-    const prev = document.getElementById('montantPreview');
-
-    if (prix && !isNaN(d1) && !isNaN(d2) && d2 > d1) {
-        const jours = Math.ceil((d2 - d1) / 86400000);
-        document.getElementById('mpJours').textContent = jours + ' jour(s)';
-        document.getElementById('mpPrix').textContent  = fmtPrix(prix);
-        document.getElementById('mpTotal').textContent = fmtPrix(jours * prix);
-        prev.style.display = 'block';
-    } else {
-        prev.style.display = 'none';
-    }
-}
-
-document.getElementById('rAppart')?.addEventListener('change', calcMontant);
-
-async function submitReservation(e) {
-    e.preventDefault();
-    const errEl = document.getElementById('reservError');
-    errEl.style.display = 'none';
-
-    const body = {
-        id_appartement: parseInt(document.getElementById('rAppart').value),
-        date_entree:    document.getElementById('rDateEntree').value,
-        date_sortie:    document.getElementById('rDateSortie').value || undefined,
-        avance_paye:    parseFloat(document.getElementById('rAvance').value) || 0,
-        notes:          document.getElementById('rNotes').value,
-    };
-
-    if (currentUser.role !== 'client') {
-        const cid = document.getElementById('rClientId').value;
-        if (!cid) { errEl.textContent = 'Veuillez saisir l\'ID du client'; errEl.style.display = 'block'; return; }
-        body.id_client = parseInt(cid);
-    }
-
-    try {
-        await api('/reservations', 'POST', body);
-        closeModalFn();
-        toast('Réservation créée avec succès !', 'success');
-        if (currentUser.role === 'client') loadMesReservations();
-        else loadDashboard();
-    } catch (err) {
-        errEl.textContent = err.message || 'Erreur de réservation';
-        errEl.style.display = 'block';
-    }
+    } catch (err) { toast(err.message, 'error'); }
 }
 
 // ── Dashboard ─────────────────────────────────────────────────
@@ -356,31 +421,27 @@ async function loadDashboard() {
     try {
         const data = await api('/appartements/dashboard');
         const d = data.dashboard;
-
         document.getElementById('statsRow').innerHTML = `
           <div class="stat-card"><div class="stat-val">${d.apparts_disponibles}</div><div class="stat-lbl">Apparts disponibles</div></div>
           <div class="stat-card"><div class="stat-val">${d.reservations_actives}</div><div class="stat-lbl">Réservations actives</div></div>
           <div class="stat-card"><div class="stat-val">${d.reservations_aujourd_hui}</div><div class="stat-lbl">Réservations aujourd'hui</div></div>
           <div class="stat-card"><div class="stat-val">${fmtPrix(d.recettes_jour)}</div><div class="stat-lbl">Recettes du jour</div></div>
-          <div class="stat-card"><div class="stat-val">${fmtPrix(d.recettes_mois)}</div><div class="stat-lbl">Recettes du mois</div></div>
-        `;
+          <div class="stat-card"><div class="stat-val">${fmtPrix(d.recettes_mois)}</div><div class="stat-lbl">Recettes du mois</div></div>`;
 
         const loues = data.loues_aujourd_hui;
         if (!loues?.length) {
-            document.getElementById('tableDashLoues').innerHTML = '<div class="empty-state"><p>Aucun appartement loué aujourd\'hui</p></div>';
+            document.getElementById('tableDashLoues').innerHTML = '<div class="empty-state" style="padding:20px"><p>Aucun appartement loué aujourd\'hui</p></div>';
         } else {
             document.getElementById('tableDashLoues').innerHTML = buildTable(
                 ['Appart.', 'Client', 'Entrée', 'Jours', 'Montant/j', 'Cumulé', 'Avance', 'Solde'],
                 loues.map(r => [
-                    r.numero_appart, r.nom_client, fmtDate(r.date_entree),
+                    `<strong>${r.numero_appart}</strong>`, r.nom_client, fmtDate(r.date_entree),
                     r.jours_ecoules, fmtPrix(r.prix_unitaire), fmtPrix(r.montant_cumule),
                     fmtPrix(r.avance_paye), colorSolde(r.solde_avance)
                 ])
             );
         }
-    } catch (err) {
-        console.error('Dashboard:', err);
-    }
+    } catch (err) { console.error('Dashboard:', err); }
 }
 
 // ── Clients ───────────────────────────────────────────────────
@@ -389,35 +450,26 @@ async function loadClients() {
     if (!el) return;
     el.innerHTML = '<div class="loading-spinner">Chargement...</div>';
     const search = document.getElementById('searchClient')?.value || '';
-
     try {
         const data = await api(`/clients?search=${search}`);
-        if (!data.clients?.length) {
-            el.innerHTML = '<div class="empty-state"><h3>Aucun client trouvé</h3></div>';
-            return;
-        }
+        if (!data.clients?.length) { el.innerHTML = '<div class="empty-state"><h3>Aucun client trouvé</h3></div>'; return; }
         el.innerHTML = '<div class="table-wrap">' + buildTable(
-            ['ID', 'Nom', 'CNI', 'Téléphone', 'Appartement', 'Bâtiment', 'Date entrée', 'Avance', 'Solde', 'Statut'],
+            ['ID', 'Nom', 'CNI', 'Téléphone', 'Appartement', 'Date entrée', 'Avance', 'Solde', 'Statut'],
             data.clients.map(c => [
                 c.id_client, c.nom_client, c.numero_cni, c.telephone || '—',
-                c.numero_appart || '—', c.nom_batiment || '—',
+                c.numero_appart ? `Appart. ${c.numero_appart}` : '—',
                 fmtDate(c.date_entree), fmtPrix(c.avance_paye || 0),
                 colorSolde(c.solde_restant || 0),
                 `<span class="reserv-statut s-${c.statut}">${c.statut}</span>`
             ])
         ) + '</div>';
-    } catch (err) {
-        el.innerHTML = `<div class="empty-state"><h3>Erreur : ${err.message}</h3></div>`;
-    }
+    } catch (err) { el.innerHTML = `<div class="empty-state"><h3>Erreur : ${err.message}</h3></div>`; }
 }
 
 // ── Rapports ──────────────────────────────────────────────────
 function loadRapport(type, btn) {
     rapportActif = type;
-    if (btn) {
-        document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-    }
+    if (btn) { document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); }
     loadRapportActif();
 }
 
@@ -425,10 +477,8 @@ async function loadRapportActif() {
     const el = document.getElementById('rapportContent');
     if (!el) return;
     el.innerHTML = '<div class="loading-spinner">Chargement...</div>';
-
     const moisVal = document.getElementById('filtMois')?.value || '';
     const [annee, mois] = moisVal ? moisVal.split('-') : [new Date().getFullYear(), new Date().getMonth() + 1];
-
     try {
         if (rapportActif === 'resume') {
             const data = await api(`/rapports/resume?mois=${mois}&annee=${annee}`);
@@ -440,91 +490,68 @@ async function loadRapportActif() {
                 <div class="stat-card"><div class="stat-val">${r.terminees}</div><div class="stat-lbl">Terminées</div></div>
                 <div class="stat-card"><div class="stat-val">${fmtPrix(r.montant_total_prevu)}</div><div class="stat-lbl">Montant prévu</div></div>
                 <div class="stat-card"><div class="stat-val">${fmtPrix(r.montant_encaisse)}</div><div class="stat-lbl">Encaissé</div></div>
-              </div>
-              <h3 style="margin-top:24px;font-size:16px;color:var(--vert)">Par bâtiment</h3>
-              ${buildTable(['Bâtiment','Réservations','Total'],data.par_batiment.map(b=>[b.nom_batiment,b.nb,fmtPrix(b.total)]))}`;
+              </div>`;
         } else {
             const data = await api(`/rapports/journal?date=${new Date().toISOString().split('T')[0]}`);
-            if (!data.journal?.length) {
-                el.innerHTML = '<div class="empty-state"><h3>Aucune entrée pour cette date</h3></div>';
-                return;
-            }
+            if (!data.journal?.length) { el.innerHTML = '<div class="empty-state"><h3>Aucune entrée pour cette date</h3></div>'; return; }
             el.innerHTML = buildTable(
-                ['Appart.', 'Bâtiment', 'Client', 'Téléphone', 'Montant/j', 'Jours', 'Cumulé', 'Avance', 'Solde'],
+                ['Appart.', 'Client', 'Tél.', 'Montant/j', 'Jours', 'Cumulé', 'Avance', 'Solde'],
                 data.journal.map(j => [
-                    j.numero_appart, j.nom_batiment, j.nom_client, j.telephone,
+                    `Appart. ${j.numero_appart}`, j.nom_client, j.telephone || '—',
                     fmtPrix(j.montant_jour), j.jours_ecoules, fmtPrix(j.montant_cumule),
                     fmtPrix(j.avance_initiale), colorSolde(j.solde_restant)
                 ])
             );
         }
-    } catch (err) {
-        el.innerHTML = `<div class="empty-state"><h3>Erreur : ${err.message}</h3></div>`;
-    }
+    } catch (err) { el.innerHTML = `<div class="empty-state"><h3>Erreur : ${err.message}</h3></div>`; }
 }
 
 // ── Admin ─────────────────────────────────────────────────────
 function loadAdmin(section, btn) {
-    adminActif = section;
-    if (btn) {
-        document.querySelectorAll('.atab').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-    }
+    if (btn) { document.querySelectorAll('.atab').forEach(t => t.classList.remove('active')); btn.classList.add('active'); }
     const el = document.getElementById('adminContent');
     if (!el) return;
-
     if (section === 'employes') loadAdminEmployes(el);
-    else if (section === 'appartements') loadAdminApparts(el);
-    else if (section === 'logs') loadAdminLogs(el);
+    else if (section === 'appartements') { el.innerHTML = '<div style="padding:20px"><button class="btn btn-primary" onclick="showPage(\'appartements\')">Voir tous les appartements</button></div>'; }
+    else if (section === 'services') loadAdminServices(el);
+    else if (section === 'logs') el.innerHTML = '<div class="empty-state"><h3>Journal des accès</h3><p>Disponible via /api/rapports/logs</p></div>';
 }
 
 async function loadAdminEmployes(el) {
-    el.innerHTML = `
-      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-        <button class="btn btn-primary" onclick="showModalEmploye()">➕ Ajouter un employé</button>
-      </div>
-      <div class="loading-spinner">Chargement...</div>`;
-    // Implémenter avec api('/employes')
-    toast('Section employés — connectez /api/employes', 'info');
+    el.innerHTML = '<div class="loading-spinner">Chargement...</div>';
+    try {
+        const data = await api('/employes');
+        if (!data.employes?.length) { el.innerHTML = '<div class="empty-state"><h3>Aucun employé</h3></div>'; return; }
+        el.innerHTML = buildTable(
+            ['ID', 'Nom', 'Poste', 'Email', 'Dernière connexion', 'Statut'],
+            data.employes.map(e => [
+                e.id_employee, e.nom_employee, e.poste || '—', e.email || '—',
+                fmtDate(e.last_login), e.is_active
+                    ? '<span style="color:var(--vert-dark);font-weight:600">Actif</span>'
+                    : '<span style="color:var(--rouge)">Inactif</span>'
+            ])
+        );
+    } catch (err) { el.innerHTML = `<div class="empty-state"><h3>Erreur : ${err.message}</h3></div>`; }
 }
 
-async function loadAdminApparts(el) {
-    el.innerHTML = `
-      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-        <button class="btn btn-primary" onclick="showPage('appartements')">Voir tous les appartements</button>
-      </div>`;
+async function loadAdminServices(el) {
+    el.innerHTML = '<div class="empty-state"><h3>Services additionnels</h3><p>Les demandes d\'accueil aéroport et de tourisme apparaissent ici après les réservations.</p></div>';
 }
 
-async function loadAdminLogs(el) {
-    el.innerHTML = '<div class="empty-state"><h3>Journal des accès</h3><p>Consultez les logs via l\'API /api/admin/logs</p></div>';
-}
-
-// ── CRON manuel ───────────────────────────────────────────────
+// ── CRON ──────────────────────────────────────────────────────
 async function lancerCron() {
     if (!confirm('Lancer la vérification journalière manuellement ?')) return;
     try {
         const data = await api('/admin/cron/verif', 'POST');
         toast(`Vérification terminée : ${data.journauxCrees} journaux créés`, 'success');
         loadDashboard();
-    } catch (err) {
-        toast(err.message, 'error');
-    }
+    } catch (err) { toast(err.message, 'error'); }
 }
 
-// ── Export CSV ────────────────────────────────────────────────
 function exportCSV(type = 'reservations') {
     if (!currentUser) { showPage('login'); return; }
     const token = localStorage.getItem('token');
     window.open(`/api/rapports/export-csv?type=${type}&token=${token}`);
-}
-
-// ── Stats accueil ─────────────────────────────────────────────
-async function loadStatsDispo() {
-    try {
-        const data = await api('/appartements?disponible=true');
-        const el = document.getElementById('statDispo');
-        if (el) el.textContent = data.appartements?.length || 0;
-    } catch {}
 }
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -546,8 +573,8 @@ function fmtDate(d) {
 
 function colorSolde(v) {
     const n = parseFloat(v) || 0;
-    const color = n >= 0 ? 'var(--vert-ok)' : 'var(--rouge)';
-    return `<span style="color:${color};font-weight:500">${fmtPrix(n)}</span>`;
+    const color = n >= 0 ? 'var(--vert-dark)' : 'var(--rouge)';
+    return `<span style="color:${color};font-weight:600">${fmtPrix(n)}</span>`;
 }
 
 function toast(msg, type = '') {
