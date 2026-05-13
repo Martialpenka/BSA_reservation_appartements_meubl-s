@@ -1,4 +1,21 @@
 require('dotenv').config();
+const { pool } = require('./config/db');
+const fs = require('fs');
+const path = require('path');
+
+async function initDatabase() {
+    try {
+        const schemaPath = path.join(__dirname, '../database/schema.sql');
+        const sql = fs.readFileSync(schemaPath, 'utf8');
+        await pool.query(sql);
+        console.log('[DB] Base de données initialisée avec succès');
+    } catch (err) {
+        console.log('[DB] Tables déjà existantes ou erreur:', err.message);
+    }
+}
+
+initDatabase();
+
 const express = require('express');
 const cors    = require('cors');
 const helmet  = require('helmet');
