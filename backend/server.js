@@ -5,15 +5,20 @@ const path = require('path');
 
 async function initDatabase() {
     try {
+        await pool.query('SELECT 1');
+        console.log('[DB] Connexion PostgreSQL OK');
         const schemaPath = path.join(__dirname, '../database/schema.sql');
         const sql = fs.readFileSync(schemaPath, 'utf8');
         await pool.query(sql);
         console.log('[DB] Base de données initialisée avec succès');
     } catch (err) {
-        console.log('[DB] Tables déjà existantes ou erreur:', err.message);
+        console.error('[DB] ERREUR CONNEXION:', err.message);
+        console.error('[DB] Host:', process.env.DB_HOST);
+        console.error('[DB] Port:', process.env.DB_PORT);
+        console.error('[DB] Name:', process.env.DB_NAME);
+        console.error('[DB] User:', process.env.DB_USER);
     }
 }
-
 initDatabase();
 
 const express = require('express');
