@@ -85,13 +85,12 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ error: err.message || 'Erreur interne' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log('\n╔═══════════════════════════════════════════╗');
     console.log('║  BSA - Beautiful Stay by Alliance          ║');
-    console.log('║  Serveur : http://localhost:' + PORT + '           ║');
+    console.log('║  Serveur : http://0.0.0.0:' + PORT + '           ║');
     console.log('╚═══════════════════════════════════════════╝\n');
     const { planifier } = require('./cron/verificationJournaliere');
     planifier();
 });
-
 module.exports = app;
