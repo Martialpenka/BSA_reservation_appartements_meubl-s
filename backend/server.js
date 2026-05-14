@@ -1,35 +1,31 @@
 require('dotenv').config();
-const { pool } = require('./config/db');
-const fs = require('fs');
-const path = require('path');
+const express   = require('express');
+const cors      = require('cors');
+const helmet    = require('helmet');
+const morgan    = require('morgan');
+const path      = require('path');
+const rateLimit = require('express-rate-limit');
+const { pool }  = require('./config/db');
 
+const app  = express();
+const PORT = process.env.PORT || 3000;
+
+// ── Init base de données ──────────────────────────────────────
 async function initDatabase() {
     try {
         await pool.query('SELECT 1');
         console.log('[DB] Connexion PostgreSQL OK');
+        const fs = require('fs');
         const schemaPath = path.join(__dirname, '../database/schema.sql');
         const sql = fs.readFileSync(schemaPath, 'utf8');
         await pool.query(sql);
         console.log('[DB] Base de données initialisée avec succès');
     } catch (err) {
-        console.error('[DB] ERREUR CONNEXION:', err.message);
-        console.error('[DB] Host:', process.env.DB_HOST);
-        console.error('[DB] Port:', process.env.DB_PORT);
-        console.error('[DB] Name:', process.env.DB_NAME);
-        console.error('[DB] User:', process.env.DB_USER);
+        console.error('[DB] ERREUR:', err.message);
     }
 }
+
 initDatabase();
-
-const express = require('express');
-const cors    = require('cors');
-const helmet  = require('helmet');
-const morgan  = require('morgan');
-const path    = require('path');
-const rateLimit = require('express-rate-limit');
-
-const app  = express();
-const PORT = process.env.PORT || 3000;
 
 // ── Sécurité ──────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -45,7 +41,11 @@ const limiter = rateLimit({
     max: parseInt(process.env.RATE_LIMIT_MAX) || 100,
     message: { error: 'Trop de requêtes, réessayez plus tard' }
 });
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { error: 'Trop de tentatives' } });
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: { error: 'Trop de tentatives' }
+});
 
 app.use('/api/', limiter);
 app.use('/api/auth/login',    authLimiter);
@@ -55,7 +55,7 @@ app.use('/api/auth/register', authLimiter);
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ── Fichiers statiques (frontend) ────────────────────────────
+// ── Fichiers statiques ────────────────────────────────────────
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // ── Routes API ────────────────────────────────────────────────
@@ -67,7 +67,7 @@ app.use('/api/employes',     require('./routes/employes'));
 app.use('/api/paiements',    require('./routes/paiements'));
 app.use('/api/rapports',     require('./routes/rapports'));
 
-// ── CRON manuel (gestionnaire) ────────────────────────────────
+// ── CRON manuel ───────────────────────────────────────────────
 const { verifyToken, isGestionnaire } = require('./middleware/auth');
 const { lancerVerificationJournaliere } = require('./cron/verificationJournaliere');
 
@@ -76,7 +76,7 @@ app.post('/api/admin/cron/verif', verifyToken, isGestionnaire, async (req, res) 
     res.json(result);
 });
 
-// ── Santé de l'API ────────────────────────────────────────────
+// ── Santé ─────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', version: '1.0.0', timestamp: new Date().toISOString() });
 });
@@ -94,10 +94,10 @@ app.use((err, req, res, next) => {
 
 // ── Démarrage ─────────────────────────────────────────────────
 app.listen(PORT, () => {
-    console.log(`\n╔═══════════════════════════════════════════╗`);
-    console.log(`║  🏠 Gestion Appartements Meublés           ║`);
+    console.log('\n╔═══════════════════════════════════════════╗');
+    console.log('║  🏠 Gestion Appartements Meublés BSA       ║');
     console.log(`║  Serveur : http://localhost:${PORT}           ║`);
-    console.log(`╚═══════════════════════════════════════════╝\n`);
+    console.log('╚═══════════════════════════════════════════╝\n');
     const { planifier } = require('./cron/verificationJournaliere');
     planifier();
 });
