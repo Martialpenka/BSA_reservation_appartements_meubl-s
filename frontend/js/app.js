@@ -150,7 +150,7 @@ function buildAppartCard(a) {
     // Construire les images du carrousel (6 photos)
     var photoHtml = '';
     for (var i = 0; i < 6; i++) {
-        photoHtml += '<img src="images/appartements/appart_' + num + '/' + i + '.jpg" ' +
+       photoHtml += '<img src="/images/appartements/appart_' + num + '/' + i + '.jpg" ' +
             'class="appart-photo ' + (i === 0 ? 'active' : '') + '" ' +
             'alt="Appart ' + num + ' photo ' + (i+1) + '" ' +
             'onerror="this.style.display=\'none\'">';
