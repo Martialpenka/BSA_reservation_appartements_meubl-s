@@ -1,16 +1,27 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-const pool = new Pool({
-    host:     process.env.DB_HOST     || 'localhost',
-    port:     parseInt(process.env.DB_PORT) || 5432,
-    database: process.env.DB_NAME     || 'appart_meuble',
-    user:     process.env.DB_USER     || 'postgres',
-    password: process.env.DB_PASSWORD,
-    ssl: process.env.NODE_ENV === 'production'
-        ? { rejectUnauthorized: false }
-        : false
-});
+let poolConfig;
+
+if (process.env.DATABASE_URL) {
+    poolConfig = {
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    };
+    console.log('[DB] Utilisation de DATABASE_URL');
+} else {
+    poolConfig = {
+        host:     process.env.DB_HOST     || 'localhost',
+        port:     parseInt(process.env.DB_PORT) || 5432,
+        database: process.env.DB_NAME     || 'appart_meuble',
+        user:     process.env.DB_USER     || 'postgres',
+        password: process.env.DB_PASSWORD,
+        ssl: false
+    };
+    console.log('[DB] Utilisation des variables séparées, host:', process.env.DB_HOST);
+}
+
+const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
     console.error('[DB] Erreur PostgreSQL:', err.message);
