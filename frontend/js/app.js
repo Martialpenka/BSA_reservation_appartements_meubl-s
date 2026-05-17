@@ -151,7 +151,7 @@ function buildAppartCard(a) {
     var photoHtml = '';
     for (var i = 0; i < 6; i++) {
        photoHtml += '<img src="/images/appartements/appart_' + num + '/' + i + '.jpg" ' +
-            'class="appart-photo ' + (i === 0 ? 'active' : '') + '" ' +
+            'class="appart-photo active" style="opacity:1;position:relative;display:block;width:100%;height:' + (i === 0 ? '220px' : '0') + ';object-fit:cover;" ' +
             'alt="Appart ' + num + ' photo ' + (i+1) + '" ' +
             'onerror="this.style.display=\'none\'">';
     }

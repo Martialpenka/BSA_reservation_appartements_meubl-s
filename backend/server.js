@@ -1,6 +1,5 @@
 require('dotenv').config();
 
-// ── Debug variables ───────────────────────────────────────────
 console.log('[ENV] DATABASE_URL:', process.env.DATABASE_URL ? 'DEFINIE' : 'NON DEFINIE');
 console.log('[ENV] DB_HOST:', process.env.DB_HOST || 'NON DEFINI');
 console.log('[ENV] NODE_ENV:', process.env.NODE_ENV || 'NON DEFINI');
@@ -56,6 +55,7 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// ── Routes API ────────────────────────────────────────────────
 app.use('/api/auth',         require('./routes/auth'));
 app.use('/api/appartements', require('./routes/appartements'));
 app.use('/api/reservations', require('./routes/reservations'));
@@ -76,6 +76,69 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', version: '1.0.0', timestamp: new Date().toISOString() });
 });
 
+// ── Route setup utilisateurs ──────────────────────────────────
+app.get('/api/setup', async (req, res) => {
+    try {
+        const bcrypt = require('bcryptjs');
+        const { query } = require('./config/db');
+
+        const hashGest = await bcrypt.hash('Gestionnaire@123', 12);
+        const hashEmp  = await bcrypt.hash('Employe@123', 12);
+        const hashCli  = await bcrypt.hash('Client@123', 12);
+
+        await query(
+            `INSERT INTO users (email, password_hash, role)
+             SELECT 'gestionnaire@appart.com', $1, 'gestionnaire'
+             WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'gestionnaire@appart.com')`,
+            [hashGest]
+        );
+        await query(
+            `INSERT INTO users (email, password_hash, role)
+             SELECT 'employe1@appart.com', $1, 'employe'
+             WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'employe1@appart.com')`,
+            [hashEmp]
+        );
+        await query(
+            `INSERT INTO users (email, password_hash, role)
+             SELECT 'client1@test.com', $1, 'client'
+             WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'client1@test.com')`,
+            [hashCli]
+        );
+        await query(
+            `INSERT INTO employee (id_user, nom_employee, poste)
+             SELECT u.id_user, 'Marie Gestionnaire', 'Gestionnaire'
+             FROM users u
+             WHERE u.email = 'gestionnaire@appart.com'
+             AND NOT EXISTS (SELECT 1 FROM employee e WHERE e.id_user = u.id_user)`
+        );
+        await query(
+            `INSERT INTO employee (id_user, nom_employee, poste)
+             SELECT u.id_user, 'Jean Employe', 'Receptionniste'
+             FROM users u
+             WHERE u.email = 'employe1@appart.com'
+             AND NOT EXISTS (SELECT 1 FROM employee e WHERE e.id_user = u.id_user)`
+        );
+        await query(
+            `INSERT INTO client (id_user, nom_client, numero_cni, email)
+             SELECT u.id_user, 'Paul Client', 'CM-TEST-001', 'client1@test.com'
+             FROM users u
+             WHERE u.email = 'client1@test.com'
+             AND NOT EXISTS (SELECT 1 FROM client c WHERE c.id_user = u.id_user)`
+        );
+
+        res.json({ message: 'Utilisateurs crees avec succes !',
+            comptes: [
+                { email: 'gestionnaire@appart.com', password: 'Gestionnaire@123', role: 'gestionnaire' },
+                { email: 'employe1@appart.com',     password: 'Employe@123',      role: 'employe' },
+                { email: 'client1@test.com',         password: 'Client@123',       role: 'client' }
+            ]
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── SPA fallback (TOUJOURS EN DERNIER) ───────────────────────
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
@@ -93,4 +156,5 @@ app.listen(PORT, '0.0.0.0', () => {
     const { planifier } = require('./cron/verificationJournaliere');
     planifier();
 });
+
 module.exports = app;
